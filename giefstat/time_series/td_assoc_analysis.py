@@ -94,20 +94,21 @@ def measure_td_assoc(x: np.ndarray, y: np.ndarray, taus: Union[np.ndarray, List[
     # 显示结果, 红色点表示显著
     if show:
         _show_results(taus, td_assocs, td_indeps, method)
-        
+    
     return td_assocs, td_indeps
 
 
-if __name__ == "__main__":
+def acf_test(x: np.ndarray, taus: Union[np.ndarray, List[int]], xtype: str = "c", 
+             max_size_bt: int = 1000, method: str = "MI-GIEF", show: bool = False, **kwargs):
+    """
+    自相关函数检验
     
-    # ---- 载入测试数据 -----------------------------------------------------------------------------
-
-    from dataset.time_delayed.data_generator import gen_four_species
-
-    samples = gen_four_species(N=6000)
-    x, y = samples[:, 1], samples[:, 2]
-
-    # ---- 时延关联检测 -----------------------------------------------------------------------------
-
-    taus = np.arange(-20, 20, 1)
-    _ = measure_td_assoc(x, y, taus, show=True, alpha=0.01, rounds=10)
+    Params:
+    -------
+    see measure_td_assoc
+    """
+    
+    y, ytype = x.copy(), xtype
+    
+    return measure_td_assoc(x, y, taus, xtype, ytype, max_size_bt, method, show, **kwargs)
+    
