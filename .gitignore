@@ -1,0 +1,15 @@
+
+*.~*
+.idea/
+*.log*
+*.lst
+*.lxi
+*.xml
+*.iml
+*.pyc
+*.pdf
+todel/
+runtime/
+tmp/
+
+todo*.py
