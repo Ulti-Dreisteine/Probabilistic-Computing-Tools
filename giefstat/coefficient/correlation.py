@@ -15,7 +15,8 @@ def cal_dist_corr(x: Union[np.ndarray, List[float]], y: Union[np.ndarray, List[f
     if x_type == "d":
         x = _encode(x, y)
         
-    return np.abs(dcor.distance_correlation(x, y))
+    # return np.abs(dcor.distance_correlation(x, y))
+    return dcor.distance_correlation(x, y)
 
 
 def cal_pearson_corr(x: Union[np.ndarray, List[float]], y: Union[np.ndarray, List[float]],
@@ -27,7 +28,8 @@ def cal_pearson_corr(x: Union[np.ndarray, List[float]], y: Union[np.ndarray, Lis
     if x_type == "d":
         x = _encode(x, y)
         
-    return np.abs(pearsonr(x, y)[0])
+    # return np.abs(pearsonr(x, y)[0])
+    return pearsonr(x, y)[0]
 
 
 def cal_spearman_corr(x: Union[np.ndarray, List[float]], y: Union[np.ndarray, List[float]],
@@ -39,7 +41,8 @@ def cal_spearman_corr(x: Union[np.ndarray, List[float]], y: Union[np.ndarray, Li
     if x_type == "d":
         x = _encode(x, y)
         
-    return np.abs(spearmanr(x, y)[0])
+    # return np.abs(spearmanr(x, y)[0])
+    return spearmanr(x, y)[0]
     
 
 def _encode(x, y) -> np.ndarray:
