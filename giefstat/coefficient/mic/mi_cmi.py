@@ -27,7 +27,7 @@ def _transf_labels2char(s: np.ndarray) -> str:
     return "".join(f"-{int(p)}" for p in s)
 
 
-def _convert_arr2int(arr: np.ndarray):
+def _convert_arr2int(arr: np.ndarray) -> np.ndarray:
     """
     将多维数据按照标签进行编码为一维整数
     
@@ -44,15 +44,13 @@ def _convert_arr2int(arr: np.ndarray):
     return np.apply_along_axis(lambda s: np.where(labels == s)[0][0], 1, arr_labels)
 
 
-def _reencode(arr: np.ndarray):
+def _reencode(arr: np.ndarray) -> np.ndarray:
     """
     重新将多维数组编码为1维数组
     """
-    
     arr = arr.copy()
     arr = discretize_arr(arr, n = arr.shape[0] // 10, method="qcut")
     arr = _convert_arr2int(arr)
-    
     return arr
 
 
@@ -61,11 +59,11 @@ class MIC(object):
     最大信息系数
     """
     
-    def __init__(self, x, y):
+    def __init__(self, x: np.ndarray, y: np.ndarray):
         self.x = x.copy().reshape(len(x), -1)
         self.y = y.copy().reshape(len(y), -1)
     
-    def __call__(self, method="rmic", encode=True):
+    def __call__(self, method: str = "rmic", encode: bool = True) -> float:
         # 多维数组逐列离散化, 并合并编码压缩为一维数组
         y = _reencode(self.y) if self.y.shape[1] > 1 else self.y.copy()
         x = _reencode(self.x) if self.x.shape[1] > 1 else self.x.copy()
@@ -74,7 +72,8 @@ class MIC(object):
             return MaximalInfoCoeff(x, y).cal_assoc()
         
         if encode:
-            x = SuperCategorEncoding(x, y).encode(method="mhg") # 进行有监督编码, NOTE x值需为int
+            # NOTE x值需为int
+            x = SuperCategorEncoding(x, y).encode(method="mhg") # 进行有监督编码
             
         return RefinedMaximalInfoCoeff(x, y).cal_assoc()
             
@@ -84,13 +83,12 @@ class CMIC(object):
     条件最大信息系数
     """
     
-    def __init__(self, x, y, z):
+    def __init__(self, x: np.ndarray, y: np.ndarray, z: np.ndarray):
         self.x = x
         self.y = y
         self.z = z
         
-    def __call__(self, method="rmic"):
+    def __call__(self, method: str = "rmic") -> float:
         xy = np.c_[self.x, self.y]
-        
         return MIC(self.x, self.y)(method) + MIC(xy, self.z)(method) - MIC(self.x, self.z)(method) - \
             MIC(self.y, self.z)(method)

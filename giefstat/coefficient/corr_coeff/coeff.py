@@ -3,7 +3,7 @@ from typing import Union, List
 import numpy as np
 import dcor
 
-from ..util.univar_encoding import SuperCategorEncoding
+from ...util.univar_encoding import SuperCategorEncoding
 
 
 def cal_dist_corr(x: Union[np.ndarray, List[float]], y: Union[np.ndarray, List[float]], 
@@ -11,6 +11,8 @@ def cal_dist_corr(x: Union[np.ndarray, List[float]], y: Union[np.ndarray, List[f
     """
     距离相关系数
     """
+    
+    x, y = np.array(x).flatten(), np.array(y).flatten()
     
     if x_type == "d":
         x = _encode(x, y)

@@ -27,7 +27,7 @@ from ...util import stdize_values, exec_model_test, cal_metric
 
 
 def _exec_model_test(x: np.ndarray, y: np.ndarray, ytype: str, model, test_ratio: float, 
-                     z: np.ndarray=None) -> float:
+                     z: np.ndarray=None, rounds: int=5) -> float:
     """
     进行建模测试
     
@@ -40,13 +40,13 @@ def _exec_model_test(x: np.ndarray, y: np.ndarray, ytype: str, model, test_ratio
     
     if z is None:
         A1 = x.reshape(len(x), -1)
-        accu_x, _ = exec_model_test(A1, y, model, metric, test_ratio, rounds=1)
+        accu_x, _ = exec_model_test(A1, y, model, metric, test_ratio, rounds)
         return accu_x
     else:
         A2 = np.c_[x, z]
         A3 = z.reshape(len(z), -1)
-        accu_xz, _ = exec_model_test(A2, y, model, metric, test_ratio, rounds=1)
-        accu_z, _ = exec_model_test(A3, y, model, metric, test_ratio, rounds=1)
+        accu_xz, _ = exec_model_test(A2, y, model, metric, test_ratio, rounds)
+        accu_z, _ = exec_model_test(A3, y, model, metric, test_ratio, rounds)
         return accu_xz - accu_z
 
 
@@ -77,6 +77,7 @@ class CondMutualInfoModel(object):
         assert xtype in DTYPES
         assert ytype in DTYPES
         assert ztype in DTYPES
+        
         self.x_norm = stdize_values(x, xtype)
         self.y_norm = stdize_values(y, ytype)
         self.z_norm = stdize_values(z, ztype)

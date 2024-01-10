@@ -77,7 +77,7 @@ def stdize_values(x: np.ndarray, dtype: str, eps: float = 1e-10) -> np.ndarray:
 
 # ---- 数据离散化 -----------------------------------------------------------------------------------
 
-def discretize_series(x: np.ndarray, n: int = 30, method="qcut") -> np.ndarray:
+def discretize_series(x: np.ndarray, n: int = None, method: str = "qcut") -> np.ndarray:
     """
     对数据序列采用等频分箱
     
@@ -86,12 +86,13 @@ def discretize_series(x: np.ndarray, n: int = 30, method="qcut") -> np.ndarray:
     n: 每个箱子里的样本数（平均值，因为pandas的结果有小幅波动）
     """
     
+    n = len(x) // 15 if n is None else n
     q = int(len(x) // n)
     
     if method == "qcut":
-        return pd.qcut(x, q, labels=False, duplicates="drop").flatten()  # 等频分箱
+        return pd.qcut(x.flatten(), q, labels=False, duplicates="drop").flatten()  # 等频分箱
     elif method == "cut":
-        return pd.cut(x, q, labels=False, duplicates="drop").flatten()  # 等宽分箱
+        return pd.cut(x.reshape(len(x), 1), q, labels=False, duplicates="drop").flatten()  # 等宽分箱
     else:
         raise ValueError(f"Invalid method {method}")
 

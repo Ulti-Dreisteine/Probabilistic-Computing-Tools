@@ -96,7 +96,7 @@ class SuperCategorEncoding(object):
         x: x序列, x一定为Nominal类别型变量
         y: y序列, y一定为数值型变量
         """
-        self.x = pd.Series(np.array(x).astype(np.int).flatten(), name = "x")  # type: pd.Series
+        self.x = pd.Series(np.array(x).astype(int).flatten(), name = "x")  # type: pd.Series
         self.y = pd.Series(np.array(y).astype(np.float32).flatten(), name = "y")  # type: pd.Series
 
     def _encode_transform(self, enc) -> np.ndarray:

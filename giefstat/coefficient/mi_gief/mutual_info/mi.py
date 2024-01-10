@@ -39,6 +39,7 @@ class MutualInfoGIEF(object):
     def __init__(self, x: np.ndarray, xtype: str, y: np.ndarray, ytype: str):
         assert xtype in DTYPES
         assert ytype in DTYPES
+        
         self.x_norm = stdize_values(x, xtype)
         self.y_norm = stdize_values(y, ytype)
         self.xtype = xtype

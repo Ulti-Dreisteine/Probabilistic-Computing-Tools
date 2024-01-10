@@ -8,7 +8,7 @@ from .mi_kde import MutualInfoKDE
 from .mic import MIC, CMIC
 from .mi_model import MutualInfoModel, CondMutualInfoModel
 from .mi_quant import MutualInfoClassic, MutualInfoDarbellay
-from .correlation import cal_dist_corr, cal_pearson_corr, cal_spearman_corr
+from .corr_coeff.coeff import cal_dist_corr, cal_pearson_corr, cal_spearman_corr
 
 ASSOC_METHODS = [
     "PearsonCorr", "SpearmanCorr", "DistCorr",
@@ -60,7 +60,8 @@ def cal_cond_entropy(x: np.ndarray, xtype: str, z: np.ndarray, ztype: str, **kwa
     return CondEntropy(x, xtype, z, ztype)(**kwargs)
 
 
-def cal_assoc(x: np.ndarray, y: np.ndarray, method: str, xtype: str = None, ytype: str = None, **kwargs):
+def cal_assoc(x: np.ndarray, y: np.ndarray, method: str, xtype: str = None, ytype: str = None, 
+              **kwargs) -> float:
     """
     计算相关或关联系数
     """
@@ -101,7 +102,7 @@ def cal_assoc(x: np.ndarray, y: np.ndarray, method: str, xtype: str = None, ytyp
     
     
 def cal_cond_assoc(x: np.ndarray, y: np.ndarray, z: np.ndarray, method: str, xtype: str = None, 
-                   ytype: str = None, ztype: str = None, **kwargs):
+                   ytype: str = None, ztype: str = None, **kwargs) -> float:
     """
     计算条件关联系数
     """
@@ -129,3 +130,12 @@ def cal_cond_assoc(x: np.ndarray, y: np.ndarray, z: np.ndarray, method: str, xty
         return drv.information_mutual_conditional(x, y, z)
     else:
         raise ValueError(f"Unsupported method: {method}.")
+    
+    
+def cal_general_assoc(x, y, z, method, xtype, ytype, ztype, **kwargs) -> float:
+    """
+    关联和条件关联的通用计算
+    """
+    
+    return cal_assoc(x, y, method, xtype, ytype, **kwargs) if z is None \
+        else cal_cond_assoc(x, y, z, method, xtype, ytype, ztype, **kwargs)

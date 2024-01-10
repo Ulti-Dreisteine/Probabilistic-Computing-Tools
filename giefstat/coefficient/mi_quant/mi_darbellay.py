@@ -33,8 +33,9 @@ class MutualInfoDarbellay(object):
         n_leafs = len(leaf_cells)
 
         mi = 0.0
+        
         for i in range(n_leafs):
-            cell = leaf_cells[i]    # type: Cell
+            cell = leaf_cells[i]  # type: Cell
             (xl, xu), (yl, yu) = cell.bounds
 
             Nxy = len(cell.arr)
@@ -42,6 +43,7 @@ class MutualInfoDarbellay(object):
                 np.where((arr_norm[:, 0] >= xl) & (arr_norm[:, 0] < xu))[0])
             Ny = len(
                 np.where((arr_norm[:, 1] >= yl) & (arr_norm[:, 1] < yu))[0])
+            
             gain = Nxy * np.log(Nxy / Nx / Ny)
             mi += gain
         

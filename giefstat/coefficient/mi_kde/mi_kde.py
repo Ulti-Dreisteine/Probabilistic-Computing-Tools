@@ -15,8 +15,8 @@ from scipy.stats import gaussian_kde
 from numpy import log
 import numpy as np
 
-from ..setting import BASE
-from ..util import stdize_values
+from ...setting import BASE
+from ...util import stdize_values
 
 
 # ---- 数据信息估计 ---------------------------------------------------------------------------------
@@ -43,8 +43,8 @@ class MutualInfoKDE(object):
     """
     互信息
     
-    Notes:
-    ------
+    Note:
+    -----
     该方法仅适用于连续变量的概率密度计算
     """
     
