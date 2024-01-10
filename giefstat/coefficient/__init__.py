@@ -1,4 +1,5 @@
 from pyitlib import discrete_random_variable as drv
+from typing import Union
 import numpy as np
 
 from ..setting import DTYPES
@@ -132,7 +133,9 @@ def cal_cond_assoc(x: np.ndarray, y: np.ndarray, z: np.ndarray, method: str, xty
         raise ValueError(f"Unsupported method: {method}.")
     
     
-def cal_general_assoc(x, y, z, method, xtype, ytype, ztype, **kwargs) -> float:
+def cal_general_assoc(x: Union[np.ndarray, list], y: Union[np.ndarray, list], 
+                      z: Union[np.ndarray, list, None], method: str, xtype: str, ytype: str, 
+                      ztype: str, **kwargs) -> float:
     """
     关联和条件关联的通用计算
     """
