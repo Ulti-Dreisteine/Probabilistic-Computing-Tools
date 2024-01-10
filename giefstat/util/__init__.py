@@ -158,7 +158,7 @@ def build_td_series(x: np.ndarray, y: np.ndarray, tau: int, max_len: int = 5000)
     y: 样本y数组
     tau: 时间平移样本点数
         * 若 tau > 0, 则 x 对应右方 tau 个样本点后的 y; 
-        - 若 tau < 0, 则 y 对应右方 tau 个样本点后的 x
+        * 若 tau < 0, 则 y 对应右方 tau 个样本点后的 x
     """
     
     x_td, y_td = x.flatten(), y.flatten()
@@ -169,6 +169,7 @@ def build_td_series(x: np.ndarray, y: np.ndarray, tau: int, max_len: int = 5000)
     N = len(x_td)
     
     lag_remain = np.abs(tau) % N
+    
     if lag_remain != 0:
         if tau > 0:
             y_td = y_td[lag_remain:]
