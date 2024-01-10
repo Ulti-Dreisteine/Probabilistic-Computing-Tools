@@ -13,3 +13,6 @@ runtime/
 tmp/
 
 todo*.py
+dist/*
+build/*
+*.egg*
