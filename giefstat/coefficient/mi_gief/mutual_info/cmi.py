@@ -31,6 +31,7 @@ class CondMutualInfoGIEF(object):
         assert ytype in DTYPES
         assert ztype in DTYPES
         
+        # 此处不用stdize_values(), 因为底层MutualInfoGIEF和CondEntropy等会执行该标准化
         self.x = x.copy()
         self.y = y.copy()
         self.z = z.copy()
