@@ -86,11 +86,11 @@ This project aims to lay a basis for:
     |   |   |-- |-- test.py                 # unittest
     |   |
     |   |-- independence_test
-    |   |-- |-- test_surrog_indep_test.py   # 案例测试
+    |   |   |-- test_surrog_indep_test.py   # 案例测试
     |   |
     |   |-- time_series
-    |   |-- |-- test_td_assoc_analysis.py   # 案例测试
-    |   |-- |-- test_transfer_entropy.py    # 案例测试
+    |   |   |-- test_td_assoc_analysis.py   # 案例测试
+    |   |   |-- test_transfer_entropy.py    # 案例测试
 ```
    
 ### Notes
