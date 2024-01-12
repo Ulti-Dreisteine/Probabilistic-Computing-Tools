@@ -7,7 +7,6 @@ BASE_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), "../" * 3))
 sys.path.insert(0, BASE_DIR)
 
 from setting import plt
-from giefstat.time_series.td_assoc_analysis import acf_test
 from giefstat.time_series.util import continuously_symbolize, parse_peaks
 from giefstat.time_series.transfer_entropy import TransferEntropy
 
@@ -17,15 +16,11 @@ if __name__ == "__main__":
     
     data = pd.read_csv(f"{BASE_DIR}/dataset/time_delayed/siso.csv")
     
-    label = "nonlinear_static"
+    label = "linear_static"
     x = data[f"x_{label}"].values
     y = data[f"y_{label}"].values
     
     # ---- 获得特征时间参数 --------------------------------------------------------------------------
-    
-    # taus = np.arange(-20, 20 + 1, 1)
-    # _ = acf_test(x, taus, "c", show=True, rounds=100)
-    # _ = acf_test(y, taus, "c", show=True, rounds=100)
     
     tau_x, tau_y = 1, 1
     
@@ -37,7 +32,7 @@ if __name__ == "__main__":
     
     te = TransferEntropy(x, y, tau_x, tau_y)
     
-    
+    # 时延检测
     td_lags = np.arange(-10, 10 + 1, 1)
     td_te_info = []
     
@@ -47,18 +42,19 @@ if __name__ == "__main__":
         td_te_info.append((te_mean, te_std))
     
     # 背景值
-    te_bg_mean, te_bg_std =te.cal_bg_te(rounds=50)
+    te_bg_mean, te_bg_std = te.cal_bg_te(rounds=50)
     ci_bg_ub = te_bg_mean + 3 * te_bg_std  # 均值 + 整数倍标准差  # 单侧检验
     
     # 解析峰值
-    peak_idxs, peak_taus, peak_strengths, peak_stds, peak_signifs = parse_peaks(tau_x, td_lags, td_te_info, ci_bg_ub)
+    peak_idxs, peak_taus, peak_strengths, peak_stds, peak_signifs = \
+        parse_peaks(tau_x, td_lags, td_te_info, ci_bg_ub)
     
     # 画图
     td_te_means = [p[0] for p in td_te_info]
-    bounds = [0, np.max(peak_strengths) * 1.1]  # 画图的上下边界
+    bounds = [0, np.max(peak_strengths) * 1.1] if peak_strengths else [0, 0.1]  # 画图的上下边界
     
     plt.figure(figsize=(3, 3))
-    plt.fill_between(td_lags, td_te_means, np.zeros_like(td_te_means))
+    plt.bar(td_lags, td_te_means)
     plt.hlines(ci_bg_ub, td_lags.min(), td_lags.max(), linestyles="-", linewidth=0.5, colors="r")
     plt.ylim(*bounds)
     plt.vlines(0, *bounds, colors="k", linewidth=1.0, zorder=2)
