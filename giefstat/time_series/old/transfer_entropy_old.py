@@ -3,15 +3,6 @@ from typing import List, Tuple
 import numpy as np
 import random
 
-# from ..probability_estimation.discrete import cal_discrete_prob
-import sys
-import os
-
-BASE_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), "../" * 3))
-sys.path.insert(0, BASE_DIR)
-
-from giefstat.probability_estimation.discrete import cal_discrete_prob
-
 
 def _build_td_series(x: np.ndarray, y: np.ndarray, td_lag: int) -> Tuple[np.ndarray, np.ndarray]:
     x_td_, y_td_ = x.flatten(), y.flatten()
@@ -36,9 +27,7 @@ def _shuffle(x: np.ndarray) -> np.ndarray:
 
 
 class TransferEntropy(object):
-    """
-    传递熵成对时延因果检验
-    """
+    """传递熵时序因果检验"""
     
     def __init__(self, x: np.ndarray, y: np.ndarray, tau_x: int, tau_y: int, alpha: float = 0.01):
         """
@@ -56,7 +45,6 @@ class TransferEntropy(object):
         -----
         x和y序列值都必须为整数
         """
-        
         try:
             assert "int" in str(x.dtype)
             assert "int" in str(y.dtype)
@@ -72,27 +60,11 @@ class TransferEntropy(object):
         
         # TODO: 未来改进这块参数
         self.kx, self.ky, self.h = 1, 1, 1  # X和Y的窗口样本数以及Y的超前时间
-    
-    @staticmethod
-    def _sum(_arr_yyx, _states_yyx, eps) -> float:
-        _te = 0.0
         
-        for _state in _states_yyx:
-            prob_yyx = cal_discrete_prob(_arr_yyx, [0, 1, 2], _state)
-            prob_y_yx = cal_discrete_prob(_arr_yyx, [0], _state[[0]], [1, 2], _state[[1, 2]])
-            prob_y_y = cal_discrete_prob(_arr_yyx, [0], _state[[0]], [1], _state[[1]])
-            
-            prob = prob_yyx * np.log2(prob_y_yx / (prob_y_y + eps) + eps)
-            
-            if not np.isnan(prob):
-                _te += prob
-        
-        return _te
-    
-    def _cal_te(self, x: np.ndarray, y: np.ndarray, sub_sample_size: int = None, rounds: int = None,
-                eps: float = 1e-12) -> Tuple[float, float, List[float]]:
+    def _cal_te(self, x: np.ndarray, y: np.ndarray, sub_sample_size: int = None, rounds: int = None) -> \
+        Tuple[float, float, List[float]]:
         """
-        计算特定序列样本的传递熵
+        计算特定时延构造的时序样本的传递熵
         
         Params:
         -------
@@ -102,35 +74,49 @@ class TransferEntropy(object):
         rounds: 重复次数
         """
         
-        # 构造联合分布样本
+        # 构造样本
         idxs = np.arange(0, len(x) - self.h * self.tau_y - 1)
-        xk = x[idxs].reshape(-1, 1)
-        yk = y[idxs].reshape(-1, 1)
-        yh = yk.copy()
+        _xk = x[idxs].reshape(-1, 1)
+        _yk = y[idxs].reshape(-1, 1)
+        _yh = _yk.copy()
         
-        arr_yyx = np.concatenate([
-            yh[self.h * self.tau_y:, :],
-            yk[: -self.h * self.tau_y, :], 
-            xk[self.h * self.tau_y:, :], 
-            ], axis = 1)  # type: np.ndarray
+        concat_xyy = np.concatenate([
+            _xk[self.h * self.tau_y:], 
+            _yk[: -self.h * self.tau_y], 
+            _yh[self.h * self.tau_y:]], axis = 1)
+        concat_yy = np.concatenate([
+            _yk[: -self.h * self.tau_y], 
+            _yh[self.h * self.tau_y:]], axis = 1)
+        
+        states_xyy = np.unique(concat_xyy, axis = 0)
+        _N = concat_xyy.shape[0]
         
         # 进行多轮随机抽样计算
-        N = len(arr_yyx)
-        sub_sample_size = N if sub_sample_size is None else sub_sample_size
+        sub_sample_size = _N if sub_sample_size is None else sub_sample_size
         rounds = 10 if rounds is None else rounds
         
+        eps = 1e-6
         te_lst = []
         
         for _ in range(rounds):
-            # 随机子采样以控制样本规模
-            _idxs = random.sample(range(N), sub_sample_size)
-            _arr_yyx = arr_yyx.copy()[_idxs, :]
-            _states_yyx = np.unique(_arr_yyx, axis = 0)
+            _idxs = random.sample(range(_N), sub_sample_size)
+            _concat_XYY, _concat_YY = concat_xyy[_idxs, :], concat_yy[_idxs, :]
             
-            _te = self._sum(_arr_yyx, _states_yyx, eps)
+            _te = 0.0
             
+            for state in states_xyy:
+                prob1 = (_concat_XYY == state).all(axis = 1).sum() / sub_sample_size
+                prob2 = (_concat_YY[:, : -1] == state[1 : -1]).all(axis = 1).sum() / sub_sample_size
+                prob3 = (_concat_XYY[:, : -1] == state[: -1]).all(axis = 1).sum() / sub_sample_size
+                prob4 = (_concat_YY == state[1 :]).all(axis = 1).sum() / sub_sample_size
+
+                prob = prob1 * np.log2((prob1 * prob2) / (prob3 * prob4 + eps) + eps)
+                
+                if np.isnan(prob) == False:
+                    _te += prob
+                    
             te_lst.append(_te)
-            
+        
         te_mean = np.nanmean(te_lst)
         te_std = np.nanstd(te_lst)
         
@@ -170,4 +156,5 @@ class TransferEntropy(object):
         te_mean, te_std = np.nanmean(te_lst), np.nanstd(te_lst)
         
         return te_mean, te_std
+        
     
