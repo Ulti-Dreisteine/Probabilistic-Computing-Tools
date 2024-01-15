@@ -1,38 +1,15 @@
-from scipy.signal import find_peaks
 from typing import List, Tuple
 import numpy as np
 import random
 
-# from ..probability_estimation.discrete import cal_discrete_prob
 import sys
 import os
 
 BASE_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), "../" * 3))
 sys.path.insert(0, BASE_DIR)
 
+from giefstat.time_series.util import build_td_series, shuffle
 from giefstat.probability_estimation.discrete import cal_discrete_prob
-
-
-def _build_td_series(x: np.ndarray, y: np.ndarray, td_lag: int) -> Tuple[np.ndarray, np.ndarray]:
-    x_td_, y_td_ = x.flatten(), y.flatten()
-    lag_remain = np.abs(td_lag) % len(x_td_)    # 求余数
-
-    if td_lag == 0:                             # 没有时滞, 那么x_td和y_td_1同时发生
-        x_td = x_td_[1:].copy()
-        y_td = y_td_[1:].copy()
-    elif td_lag > 0:                            # 正时滞, x_td比y_td_1早lag_remain发生
-        x_td = x_td_[:-lag_remain].copy()
-        y_td = y_td_[lag_remain:].copy()
-    else:                                       # 负时滞, x_td比y_td_1晚lag_remain发生
-        x_td = x_td_[lag_remain + 1:].copy()
-        y_td = y_td_[1: -lag_remain].copy()
-        
-    return x_td, y_td
-
-
-def _shuffle(x: np.ndarray) -> np.ndarray:
-    x_srg = np.random.choice(x, len(x), replace=True)  # 有放回采样
-    return x_srg
 
 
 class TransferEntropy(object):
@@ -145,7 +122,8 @@ class TransferEntropy(object):
         td_lag: X到Y的时延
         """
         
-        x_td, y_td = _build_td_series(self.x, self.y, td_lag)
+        # pylint: disable-next = unbalanced-tuple-unpacking
+        x_td, y_td =  build_td_series(self.x, self.y, td_lag)
         te_mean, te_std, te_lst = self._cal_te(x_td, y_td, **kwargs)
         
         return te_mean, te_std, te_lst
@@ -163,7 +141,7 @@ class TransferEntropy(object):
         te_lst = []
         
         for _ in range(rounds):
-            x_shuff, y_shuff = _shuffle(self.x), _shuffle(self.y)
+            x_shuff, y_shuff = shuffle(self.x), shuffle(self.y)
             te_bg, _, _ = self._cal_te(x_shuff, y_shuff, rounds=1, **kwargs)
             te_lst.append(te_bg)
         

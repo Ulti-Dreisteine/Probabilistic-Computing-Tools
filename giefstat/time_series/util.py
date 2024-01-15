@@ -1,8 +1,77 @@
+from typing import Tuple, Optional, Union, List
 from scipy.signal import find_peaks
 from itertools import permutations
-from typing import Tuple
-from typing import List
 import numpy as np
+
+
+def shuffle(x: np.ndarray) -> np.ndarray:
+    idxs = np.arange(len(x))
+    idxs_shuff = np.random.choice(idxs, len(x), replace=True)  # 有返回抽样
+    
+    if len(x.shape) == 1:
+        x_srg = x[idxs_shuff]
+    elif len(x.shape) == 2:
+        x_srg = x[idxs_shuff, :]
+    else:
+        raise RuntimeError
+    
+    return x_srg
+
+
+# ---- 时延序列构建 ---------------------------------------------------------------------------------
+
+def build_td_series(x: np.ndarray, y: np.ndarray, td_lag: int, Z: Optional[np.ndarray] = None) -> \
+    Union[Tuple[np.ndarray, np.ndarray], Tuple[np.ndarray, np.ndarray, np.ndarray]]:
+    """
+    构建延迟序列
+    
+    Params:
+    -------
+    x: X的一维序列
+    y: Y的一维序列
+    td_lag: X->Y的以样本单位计的时延
+    Z: 多维条件数组
+    """
+    
+    x_td_, y_td_ = x.flatten(), y.flatten()
+    Z_td_ = Z.copy().reshape(len(Z), -1) if Z is not None else None
+
+    lag_remain = np.abs(td_lag) % len(x_td_)  # 求余数
+
+    if td_lag == 0:
+        # 没有时滞, 那么x_td和y_td_1同时发生
+        x_td = x_td_[1:].copy()
+        y_td = y_td_[1:].copy()
+        Z_td = Z_td_[1:, :].copy() if Z is not None else None
+    elif td_lag > 0:
+        # 正时滞, x_td比y_td_1早lag_remain发生
+        x_td = x_td_[:-lag_remain].copy()
+        y_td = y_td_[lag_remain:].copy()
+        Z_td = Z_td_[lag_remain:, :].copy() if Z is not None else None
+    else:
+        # 负时滞, x_td比y_td_1晚lag_remain发生
+        x_td = x_td_[lag_remain + 1:].copy()
+        y_td = y_td_[1: -lag_remain].copy()
+        Z_td = Z_td_[1: -lag_remain, :].copy() if Z is not None else None
+
+    return (x_td, y_td) if Z is None else (x_td, y_td, Z_td)
+
+
+def _build_td_series(x: np.ndarray, y: np.ndarray, td_lag: int) -> Tuple[np.ndarray, np.ndarray]:
+    x_td_, y_td_ = x.flatten(), y.flatten()
+    lag_remain = np.abs(td_lag) % len(x_td_)    # 求余数
+
+    if td_lag == 0:                             # 没有时滞, 那么x_td和y_td_1同时发生
+        x_td = x_td_[1:].copy()
+        y_td = y_td_[1:].copy()
+    elif td_lag > 0:                            # 正时滞, x_td比y_td_1早lag_remain发生
+        x_td = x_td_[:-lag_remain].copy()
+        y_td = y_td_[lag_remain:].copy()
+    else:                                       # 负时滞, x_td比y_td_1晚lag_remain发生
+        x_td = x_td_[lag_remain + 1:].copy()
+        y_td = y_td_[1: -lag_remain].copy()
+        
+    return x_td, y_td
 
 
 # ---- 时延传递熵峰值解析 ----------------------------------------------------------------------------
