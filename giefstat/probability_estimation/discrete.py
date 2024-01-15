@@ -8,7 +8,7 @@ Created on 2024/01/11 15:58:39
 
 @Email: dreisteine262@163.com
 
-@Describe: 离散数据概率估计
+@Describe: 离散变量概率估计
 """
 
 from typing import Union, List
