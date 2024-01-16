@@ -115,20 +115,31 @@ def discretize_arr(X: np.ndarray, n: int = None, method: str = "qcut") -> np.nda
 
 # ---- K近邻查询 ------------------------------------------------------------------------------------
     
-def build_tree(x, metric: str = "chebyshev") -> Union[BallTree, KDTree]:
+def build_tree(x: np.ndarray, metric: str = "chebyshev") -> Union[BallTree, KDTree]:
     """
     建立近邻查询树. 低维用具有欧式距离特性的KDTree; 高维用具有更一般距离特性的BallTree
     """
     
+    x = x.reshape(len(x), -1)
+    
     return BallTree(x, metric=metric) if x.shape[1] >= 20 else KDTree(x, metric=metric)
 
 
-def query_neighbors_dist(tree: Union[BallTree, KDTree], x, k: int):
+def query_neighbors_dist(tree: Union[BallTree, KDTree], x: Union[np.ndarray, list], k: int) -> np.ndarray:
     """
     求得x样本在tree上的第k个近邻样本
+    
+    Note:
+    -----
+    如果tree的样本中包含了x, 则返回结果中也会含有x
     """
     
-    return tree.query(x, k=k + 1)[0][:, -1]
+    x = np.array(x).reshape(1, len(x))
+    
+    # 返回在x处，tree的样本中距离其最近的k个样本信息
+    nbrs_info = tree.query(x, k=k)
+    
+    return nbrs_info[0][:, -1]
 
 
 # ---- 空间球体积 -----------------------------------------------------------------------------------

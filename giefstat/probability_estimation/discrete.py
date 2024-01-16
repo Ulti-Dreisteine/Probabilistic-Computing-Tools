@@ -70,6 +70,7 @@ def cal_discrete_prob(arr: np.ndarray, dims: List[int], state: Union[np.ndarray,
     
     assert "int" in str(arr.dtype)
     
+    # sourcery skip: remove-unnecessary-else
     if (cdims is None) or (cstate is None):
         return _cal_prob(arr, dims, state) 
     else:

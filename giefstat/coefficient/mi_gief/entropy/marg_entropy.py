@@ -41,6 +41,7 @@ def _cal_discrete_entropy(x):
     _, counts = np.unique(x, return_counts=True, axis=0)
     proba = counts.astype(float) / len(x)
     proba = proba[proba > 0.0]
+    
     return np.sum(proba * np.log(1. / proba))
 
 
@@ -54,6 +55,7 @@ def _cal_kl_entropy(x, k, metric="chebyshev"):
     # 计算结果
     nn_distc = query_neighbors_dist(tree, x, k)  # 获得了各样本第k近邻的距离
     v = get_unit_ball_volume(D, metric)
+    
     return (-psi(k) + psi(N) + np.log(v) + D * np.log(nn_distc).mean())
     
 
@@ -62,10 +64,12 @@ class MargEntropy(object):
     
     def __init__(self, x: np.ndarray, xtype: str):
         assert xtype in DTYPES
+        
         self.x_norm = stdize_values(x, xtype)
         self.xtype = xtype
         
     def __call__(self, k: int=3, metric: str="chebyshev") -> float:
+        
         if self.xtype == "d":
             return _cal_discrete_entropy(self.x_norm) / log(BASE)
         elif self.xtype == "c":

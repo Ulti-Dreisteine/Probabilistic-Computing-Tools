@@ -12,6 +12,7 @@ Created on 2022/08/17 18:22:01
 @Describe: 三变量数据生成
 """
 
+from typing import Tuple
 import numpy as np
 
 
@@ -59,7 +60,7 @@ class DataGenerator(object):
     def __init__(self):
         pass
     
-    def gen_data(self, N: int, func: str, norm: bool=True):
+    def gen_data(self, N: int, func: str, norm: bool=True) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
         """数据生成
 
         :param N: 样本量
