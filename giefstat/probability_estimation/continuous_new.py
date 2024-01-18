@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 """
-Created on 2024/01/15 14:56:10
+Created on 2024/01/18 09:57:46
 
-@File -> continuous.py
+@File -> continuous_new.py
 
 @Author: luolei
 
 @Email: dreisteine262@163.com
 
-@Describe: 连续变量概率估计
+@Describe: 连续变量概率密度估计
 """
 
 from sklearn.neighbors import BallTree, KDTree
@@ -103,7 +103,13 @@ def cal_kde_prob_dens(x: Union[np.ndarray, list], X: Optional[np.ndarray] = None
     return kde(x.T)[0]
 
 
-def _cal_prob_dens(x, method, X, tree_x, kde_x, **kwargs) -> float:
+# TODO: 以下部分代码逻辑混乱
+
+def _cal_non_cond_prob_dens(x, method, X, tree_x, kde_x, **kwargs) -> float:
+    """
+    计算非条件概率密度
+    """
+    
     if method == "knn":
         return cal_knn_prob_dens(x, X=X, tree=tree_x, **kwargs)
     elif method == "kde":
@@ -111,19 +117,34 @@ def _cal_prob_dens(x, method, X, tree_x, kde_x, **kwargs) -> float:
     else:
         raise ValueError(f"Unsupported method {method}.")
     
-
-def _if_models_exist(tree_xz, kde_xz, tree_z, kde_z) -> bool:
+    
+def _determ_method_model(method: str, X: Optional[np.ndarray] = None, 
+                         tree: Union[BallTree, KDTree, None] = None, kde: Optional[gaussian_kde] = None):
     """
-    如果对应模型均存在, 则返回True
+    如果对应方法模型存在, 则返回该模型; 否则返回另一替代模型和方法; 否则返回空
     """
     
-    if all(
-        [(tree_xz is not None) | (kde_xz is not None), 
-         (tree_z is not None) | (kde_z is not None)]):
-        return True
+    prior_model_map = {"knn": tree, "kde": kde}
+    prior_model = prior_model_map[method]
+    sub_method = ["knn", "kde"].remove(method)[0]
+    sub_model = [tree, kde].remove(prior_model)[0]
+    
+    if prior_model is not None:
+        method_selected = method
+        X_selected = None
+        model_selected = {method_selected: prior_model}
+    elif sub_model is not None:
+        method_selected = sub_method
+        X_selected = None
+        model_selected = {method_selected: sub_model}
     else:
-        return False
-    
+        assert X is not None
+        method_selected = method
+        X_selected = X.copy()
+        model_selected = {method_selected: None}
+
+    return method_selected, X_selected, model_selected
+
 
 def cal_prob_dens(x: Union[np.ndarray, list], method: str, X: Optional[np.ndarray] = None,
                   z: Union[np.ndarray, list] = None, Z: Optional[np.ndarray] = None, 
@@ -138,6 +159,7 @@ def cal_prob_dens(x: Union[np.ndarray, list], method: str, X: Optional[np.ndarra
     -------
     x: 待计算位置
     method: 计算方法
+    
     X: X的总体样本
     z: 待计算条件位置
     XZ: XZ的总体样本
@@ -157,60 +179,35 @@ def cal_prob_dens(x: Union[np.ndarray, list], method: str, X: Optional[np.ndarra
     """
     
     assert method in {"knn", "kde"}
-
+    
+    # 数据预处理
+    x = np.array(x).flatten()
+    x = stdize_values(x, "c").flatten()         # 标准化
+    
     if z is None:
-        return _cal_prob_dens(x, method, X, tree_x, kde_x, **kwargs)
+        return _cal_non_cond_prob_dens(x, method, X, tree_x, kde_x, **kwargs)
     else:
-        xz = np.append(np.array(x).flatten(), np.array(z).flatten())
+        # 数据预处理
+        z = np.array(z).flatten()
+        z = stdize_values(z, "c").flatten()     # 标准化
         
-        if _if_models_exist(tree_xz, kde_xz, tree_z, kde_z):
-            prob_xz = _cal_prob_dens(xz, method, None, tree_xz, kde_xz, **kwargs)
-            prob_z = _cal_prob_dens(z, method, None, tree_z, kde_z, **kwargs)
-        else:
-            assert X is not None
-            assert Z is not None
-            
-            X = X.copy().reshape(len(X), -1)
-            Z = Z.copy().reshape(len(Z), -1)
-            XZ = np.c_[X, Z]
-            
-            prob_xz = _cal_prob_dens(xz, method, XZ, None, None, **kwargs)
-            prob_z = _cal_prob_dens(z, method, Z, None, None, **kwargs)
+        xz = np.r_[x, z].flatten()  # type: np.ndarray
         
-        return prob_xz / prob_z
-    
-    
+        
+        # 计算prob_xz
+        X = stdize_values(X.reshape(len(X), -1), "c") if X is not None else None
+        Z = stdize_values(Z.reshape(len(X), -1), "c") if Z is not None else None
+        
+        XZ = np.c_[X, Z] if ((X is not None) & (Z is not None)) else None
+        
+        method_selected, X_selected, model_selected = _determ_method_model(method, XZ, tree_xz, kde_xz)
+        
+        
+        
+        prob_xz = _cal_non_cond_prob_dens(xz, method_selected, X_selected, tree_xz, kde_xz, **kwargs)
+        
+        # method_selected, model_selected = _determ_method_model(method)
+        
 
-# if __name__ == "__main__":
-    
-#     # ---- 载入数据 ---------------------------------------------------------------------------------
-
-#     from dataset.trivariate.data_generator import DataGenerator
-    
-#     N = 100
-#     func = "M6"
-#     x, y, z = DataGenerator().gen_data(N, func)
-    
-#     # ---- 功能代码 ----------------------------------------------------------------------------------
-    
-#     X = np.c_[x, y]
-#     Z = np.c_[z]
-#     XZ = np.c_[X, Z]
-    
-#     # 输入参数
-#     xz: Union[np.ndarray, list] = [0.5, 0.5, 0.3]
-#     z: Union[np.ndarray, list] = [0.3]
-    
-#     # ---- 计算代码 ---------------------------------------------------------------------------------
-    
-#     XY = np.c_[x, y]
-#     xy = [0.34, 0.57]
-#     tree = build_tree(XY)
-#     print(cal_knn_prob_dens(xy, XY, k=5))
-#     print(cal_knn_prob_dens(xy, tree=tree, k=5))
-    
-#     kde = gaussian_kde(XY.T)
-#     print(cal_kde_prob_dens(xy, XY))
-#     print(cal_kde_prob_dens(xy, kde=kde))
-    
-    
+if __name__ == "__main__":
+    pass
