@@ -50,7 +50,12 @@ def exec_surrog_indep_test(x: np.ndarray, y: np.ndarray, method: str, z: np.ndar
                            alpha: float = 0.05, max_size_bt: int = 1000, size_bt: int = None, 
                            **kwargs) -> Tuple[float, Tuple[float, bool, np.ndarray]]:
     """
-    执行基于代用数据的独立性检验
+    这段代码实现了一个基于代理数据独立性检验的函数exec_surrog_indep_test，通过随机抽样和假设检验来评估两个数据集（x和y）之间的独立性。
+    计算步骤如下：
+    1. 确定随机抽样样本量：如果size_bt为None，则使用max_size_bt作为随机抽样样本量；否则，使用size_bt作为随机抽样样本量；
+    2. 计算关联系数：使用随机抽样的方法计算x和y之间的关联值，如果z不为None，则使用z数据进行计算；
+    3. 计算背景系数值：使用蒙特卡洛方法，对x和y进行重复抽样，计算抽样之间的关联值，并将所有抽样得到的关联值存储在assocs_srg数组中；
+    4. 计算显著性：基于单侧检验计算P值并判断两个数据集是否独立。
     
     Params:
     -------
