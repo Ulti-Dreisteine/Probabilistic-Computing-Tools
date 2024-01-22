@@ -4,7 +4,7 @@ from pathlib import Path
 VERSION = "1.0.0"
 DESCRIPTION = "Package for information estimation, independence test, causal structure mining, etc."
 this_directory = Path(__file__).parent
-long_description = (this_directory/"README.md").read_text(encoding="utf-8")
+long_description = (this_directory/"project_description.md").read_text(encoding="utf-8")
 
 setup(
     name="giefstat",
