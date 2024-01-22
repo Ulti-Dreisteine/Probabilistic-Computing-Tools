@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created on 2024/01/15 14:56:10
+Created on 2024/01/22 13:16:25
 
 @File -> continuous.py
 
@@ -8,7 +8,7 @@ Created on 2024/01/15 14:56:10
 
 @Email: dreisteine262@163.com
 
-@Describe: 连续变量概率估计
+@Describe: 连续变量概率密度估计
 """
 
 from sklearn.neighbors import BallTree, KDTree
@@ -103,114 +103,71 @@ def cal_kde_prob_dens(x: Union[np.ndarray, list], X: Optional[np.ndarray] = None
     return kde(x.T)[0]
 
 
-def _cal_prob_dens(x, method, X, tree_x, kde_x, **kwargs) -> float:
-    if method == "knn":
-        return cal_knn_prob_dens(x, X=X, tree=tree_x, **kwargs)
-    elif method == "kde":
-        return cal_kde_prob_dens(x, X=X, kde=kde_x)
-    else:
-        raise ValueError(f"Unsupported method {method}.")
-    
+####################################################################################################
+# 通用计算方法                                                                                       #
+####################################################################################################
 
-def _if_models_exist(tree_xz, kde_xz, tree_z, kde_z) -> bool:
-    """
-    如果对应模型均存在, 则返回True
-    """
-    
-    if all(
-        [(tree_xz is not None) | (kde_xz is not None), 
-         (tree_z is not None) | (kde_z is not None)]):
-        return True
-    else:
-        return False
-    
 
-def cal_prob_dens(x: Union[np.ndarray, list], method: str, X: Optional[np.ndarray] = None,
-                  z: Union[np.ndarray, list] = None, Z: Optional[np.ndarray] = None, 
-                  tree_x: Union[BallTree, KDTree, None] = None, kde_x: Optional[gaussian_kde] = None,
-                  tree_xz: Union[BallTree, KDTree, None] = None, kde_xz: Optional[gaussian_kde] = None,
-                  tree_z: Union[BallTree, KDTree, None] = None, kde_z: Optional[gaussian_kde] = None,
-                  **kwargs) -> float:
+def cal_non_cond_prob(x: Union[np.ndarray, list], method: str = None, X: np.ndarray = None, 
+                      model: Optional[Union[BallTree, KDTree, gaussian_kde]] = None, **kwargs):
     """
-    计算连续变量的概率密度或条件概率密度
+    计算非条件的概率密度。
+    函数首先尝试断言模型model或者样本X必须存在一个：
+    - 如果二者均不存在，则抛出ValueError
+    - 如果模型存在，则直接使用该模型计算非条件的概率密度
+    - 如果模型不存在，则使用总体样本计算非条件的概率密度。具体实现方法根据 method 参数的不同而有所不同：
+    - 如果 method 为 "knn"，则使用 BallTree 或 KDTree 模型计算非条件的概率密度；
+    - 如果 method 为 "kde"，则使用 gaussian_kde 模型计算非条件的概率密度；
+    - 否则，抛出 ValueError。
     
     Params:
     -------
     x: 待计算位置
-    method: 计算方法
-    X: X的总体样本
-    z: 待计算条件位置
-    XZ: XZ的总体样本
-    tree_x: X总体样本构建的距离树
-    kde_x: X的高斯核密度估计对象实例
-    tree_xz: XZ总体样本构建的距离树
-    kde_xz: XZ的高斯核密度估计对象实例
-    kwargs:
-        k: 近邻数, 见cal_knn_prob_dens函数
-        metric: 距离度量指标, 见cal_knn_prob_dens函数
-    
-    Notes:
-    ------
-    - x和X可以为一维或多维
-    - z和Z可以为一维或多维
-    - X和kde中必须有一个赋值, 如果有kde则优先使用kde
+    method: 所选择的方法
+    X: 总体样本集
+    model: 所使用的模型
+    **kwargs: 其他可选参数
     """
-    
-    assert method in {"knn", "kde"}
 
-    if z is None:
-        return _cal_prob_dens(x, method, X, tree_x, kde_x, **kwargs)
-    else:
-        xz = np.append(np.array(x).flatten(), np.array(z).flatten())
-        
-        if _if_models_exist(tree_xz, kde_xz, tree_z, kde_z):
-            prob_xz = _cal_prob_dens(xz, method, None, tree_xz, kde_xz, **kwargs)
-            prob_z = _cal_prob_dens(z, method, None, tree_z, kde_z, **kwargs)
+    try:
+        # 断言模型或者样本必须存在一个
+        assert (model is not None) | (X is not None)
+    except Exception as _:
+        raise ValueError("Either model or X must be specified.")
+    
+    # 如果对应方法模型存在, 则直接使用该模型计算; 否则使用总体样本计算
+    if model is not None:
+        if type(model) in [BallTree, KDTree]:
+            return cal_knn_prob_dens(x, tree=model, **kwargs)
+        elif type(model) in [gaussian_kde]:
+            return cal_kde_prob_dens(x, kde=model)
         else:
-            assert X is not None
-            assert Z is not None
-            
-            X = X.copy().reshape(len(X), -1)
-            Z = Z.copy().reshape(len(Z), -1)
-            XZ = np.c_[X, Z]
-            
-            prob_xz = _cal_prob_dens(xz, method, XZ, None, None, **kwargs)
-            prob_z = _cal_prob_dens(z, method, Z, None, None, **kwargs)
+            raise ValueError("model type must be in [BallTree, KDTree, gaussian_kde]")
+    else:
+        if method == "knn":
+            return cal_knn_prob_dens(x, X=X, **kwargs)
+        elif method == "kde":
+            return cal_kde_prob_dens(x, X=X)
+        else:
+            raise ValueError("method must be in ['knn', 'kde']")
         
-        return prob_xz / prob_z
-    
-    
 
-# if __name__ == "__main__":
-    
-#     # ---- 载入数据 ---------------------------------------------------------------------------------
+# TODO: 计算条件概率cal_cond_prob(...)
+        
 
-#     from dataset.trivariate.data_generator import DataGenerator
-    
-#     N = 100
-#     func = "M6"
-#     x, y, z = DataGenerator().gen_data(N, func)
-    
-#     # ---- 功能代码 ----------------------------------------------------------------------------------
-    
-#     X = np.c_[x, y]
-#     Z = np.c_[z]
-#     XZ = np.c_[X, Z]
-    
-#     # 输入参数
-#     xz: Union[np.ndarray, list] = [0.5, 0.5, 0.3]
-#     z: Union[np.ndarray, list] = [0.3]
-    
-#     # ---- 计算代码 ---------------------------------------------------------------------------------
-    
-#     XY = np.c_[x, y]
-#     xy = [0.34, 0.57]
-#     tree = build_tree(XY)
-#     print(cal_knn_prob_dens(xy, XY, k=5))
-#     print(cal_knn_prob_dens(xy, tree=tree, k=5))
-    
-#     kde = gaussian_kde(XY.T)
-#     print(cal_kde_prob_dens(xy, XY))
-#     print(cal_kde_prob_dens(xy, kde=kde))
-    
-    
+if __name__ == "__main__":
+    # 生成一些样本数据
+    data = np.random.rand(100, 2)
+
+    # 创建一个BallTree for the sample data
+    tree = BallTree(data)
+
+    # 计算给定值的非条件概率密度
+    x = np.array([0.5, 0.5])
+    p_x = cal_non_cond_prob(x, model=tree)
+    print("Probability density of x:", p_x)
+
+    #  Alternatively, you can provide the input data and计算非条件概率密度
+    X = np.random.rand(100, 2)
+    p_X = cal_non_cond_prob(x, method="kde", X=X)
+    print(f"Probability density of x with respect to X: {p_X}")
