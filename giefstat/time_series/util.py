@@ -54,7 +54,7 @@ def build_td_series(x: np.ndarray, y: np.ndarray, td_lag: int, Z: Optional[np.nd
         y_td = y_td_[1: -lag_remain].copy()
         Z_td = Z_td_[1: -lag_remain, :].copy() if Z is not None else None
 
-    return (x_td, y_td) if Z is None else (x_td, y_td, Z_td)
+    return (x_td, y_td) if Z is None else (x_td, y_td, Z_td) # type: ignore
 
 
 def _build_td_series(x: np.ndarray, y: np.ndarray, td_lag: int) -> Tuple[np.ndarray, np.ndarray]:
@@ -77,7 +77,8 @@ def _build_td_series(x: np.ndarray, y: np.ndarray, td_lag: int) -> Tuple[np.ndar
 # ---- 时延传递熵峰值解析 ----------------------------------------------------------------------------
 
 def parse_peaks(tau_x: int, td_lags: np.ndarray, td_te_info: List[tuple], ci_bg_ub: float, 
-                    thres: float = None, distance: int = None, prominence: float = None):
+                thres: Optional[float] = None, distance: Optional[int] = None, 
+                prominence: Optional[float] = None):
     """
     从时延TE结果中寻找是否有高于阈值的一个或多个峰值, 如果没有则默认峰在0时延处
     

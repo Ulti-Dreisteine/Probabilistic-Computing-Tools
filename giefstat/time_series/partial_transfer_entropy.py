@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 import numpy as np
 import random
 
@@ -65,7 +65,7 @@ class TransferEntropy(object):
             cdims_yxz = list(range(1, D))
             prob_y_yxz = cal_discrete_prob(_arr_yyxz, [0], _state[[0]], cdims_yxz, _state[cdims_yxz])
             
-            cdims_yz = [1] + range(3, D)
+            cdims_yz = [1] + list(range(3, D))
             prob_y_yz = cal_discrete_prob(_arr_yyxz, [0], _state[[0]], cdims_yz, _state[cdims_yz])
             
             prob = prob_yyxz * np.log2(prob_y_yxz / (prob_y_yz + eps) + eps)
@@ -75,8 +75,8 @@ class TransferEntropy(object):
         
         return _te
         
-    def _cal_te(self, x: np.ndarray, y: np.ndarray, Z: np.ndarray, sub_sample_size: int = None, 
-                rounds: int = None, eps: float = 1e-12) -> Tuple[float, float, List[float]]:   
+    def _cal_te(self, x: np.ndarray, y: np.ndarray, Z: np.ndarray, sub_sample_size: Optional[int] = None, 
+                rounds: int = 10, eps: float = 1e-12) -> Tuple[float, float, List[float]]:   
         """
         计算特定时延构造的时序样本的传递熵
         
@@ -106,7 +106,6 @@ class TransferEntropy(object):
         # 进行多轮随机抽样计算
         N = len(arr_yyxz)
         sub_sample_size = N if sub_sample_size is None else sub_sample_size
-        rounds = 10 if rounds is None else rounds
         
         te_lst = []
         
@@ -135,12 +134,12 @@ class TransferEntropy(object):
         """
         
         # pylint: disable-next = unbalanced-tuple-unpacking
-        x_td, y_td, Z_td = build_td_series(self.x, self.y, td_lag, self.Z)
+        x_td, y_td, Z_td = build_td_series(self.x, self.y, td_lag, self.Z) # type: ignore
         te_mean, te_std, te_lst = self._cal_te(x_td, y_td, Z_td)
         
         return te_mean, te_std, te_lst
     
-    def cal_bg_te(self, rounds: int = None) -> Tuple[float, float]:
+    def cal_bg_te(self, rounds: int = 50) -> Tuple[float, float]:
         """
         获得背景分布均值和标准差
         
@@ -149,7 +148,6 @@ class TransferEntropy(object):
         rounds: 重复测算次数
         """
         
-        rounds = 50 if rounds is None else rounds
         te_lst = []
         
         for _ in range(rounds):

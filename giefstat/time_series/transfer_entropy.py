@@ -123,12 +123,12 @@ class TransferEntropy(object):
         """
         
         # pylint: disable-next = unbalanced-tuple-unpacking
-        x_td, y_td =  build_td_series(self.x, self.y, td_lag)
+        x_td, y_td =  build_td_series(self.x, self.y, td_lag) # type: ignore
         te_mean, te_std, te_lst = self._cal_te(x_td, y_td, **kwargs)
         
         return te_mean, te_std, te_lst
     
-    def cal_bg_te(self, rounds: int = None, **kwargs) -> Tuple[float, float]:
+    def cal_bg_te(self, rounds: int = 50, **kwargs) -> Tuple[float, float]:
         """
         获得背景分布均值和标准差
         
@@ -137,7 +137,6 @@ class TransferEntropy(object):
         rounds: 重复测算次数
         """
         
-        rounds = 50 if rounds is None else rounds
         te_lst = []
         
         for _ in range(rounds):

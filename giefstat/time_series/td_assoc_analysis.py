@@ -39,7 +39,12 @@ def _deter_size_bt(N: int, taus: Union[np.ndarray, List[int]], max_size_bt: int)
 def _show_results(taus, td_assocs, td_indeps, method):
     plt.figure()
     plt.scatter(
-        taus, td_assocs, edgecolors=["k" if p==1 else "r" for p in td_indeps], c="w", lw=2, zorder=1)
+        taus, 
+        td_assocs, 
+        edgecolors=["k" if p==1 else "r" for p in td_indeps], # type: ignore
+        c="w", 
+        lw=2, 
+        zorder=1)
     plt.plot(taus, td_assocs, c="k", lw=1.5, zorder=0)
     plt.grid(alpha=0.3, zorder=-1)
     plt.xlabel("$\\tau$")
