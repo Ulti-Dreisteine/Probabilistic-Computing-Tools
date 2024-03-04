@@ -98,7 +98,7 @@ def exec_surrog_indep_test(x: np.ndarray, y: np.ndarray, method: str, z: np.ndar
         # 基于代用数据获得背景值
         idxs_bt = random.choices(idxs, k=size_bt)   # 有放回抽样
         x_bt, y_bt = x[idxs_bt], y[idxs_bt]
-        x_srg = np.random.permutation(x_bt)         # 随机重排获得代用数据
+        x_srg = np.random.permutation(x_bt)         # 随机重排获得代用数据，NOTE，只对x进行重排
         
         if z is None:
             assoc_srg = cal_general_assoc(x_srg, y_bt, None, method, xtype, ytype, ztype, **kwargs)
