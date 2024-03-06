@@ -20,7 +20,7 @@ BASE_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), "../" * 3))
 sys.path.insert(0, BASE_DIR)
 
 from setting import plt
-from giefstat.indepence_test.surrog_indep_test import exec_surrog_indep_test
+from giefstat.independence_test.surrog_indep_test import exec_surrog_indep_test
 from dataset.bivariate.data_generator import DataGenerator
 
 

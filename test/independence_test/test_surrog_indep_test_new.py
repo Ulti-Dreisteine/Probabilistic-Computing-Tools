@@ -163,8 +163,8 @@ if __name__ == "__main__":
     max_size_bt = 5000
     
     # method = "PearsonCorr"
-    method = "MI-GIEF"
-    # method = "MIC"
+    # method = "MI-GIEF"
+    method = "MIC"
     
     """计算原理：
     1. 进行多次Bootstrap抽样或降采样, 在每一轮抽样计算中;
@@ -184,6 +184,7 @@ if __name__ == "__main__":
     bt_records = {"bt": [], "srg": []}
     
     for _ in range(rounds):
+        print(f"\rround {_}", end="")
         
         # TODO: Bootstrap抽样 or Subsampling???
         # NOTE: 基于KNN、KDE等方法对于重复样本很敏感

@@ -1,7 +1,7 @@
 from scipy.stats import pearsonr, spearmanr
 from typing import Union, List
 import numpy as np
-import dcor
+from pingouin import distance_corr as dcor
 
 from ...util.univar_encoding import SuperCategorEncoding
 
@@ -18,7 +18,7 @@ def cal_dist_corr(x: Union[np.ndarray, List[float]], y: Union[np.ndarray, List[f
         x = _encode(x, y)
         
     # return np.abs(dcor.distance_correlation(x, y))
-    return dcor.distance_correlation(x, y)
+    return dcor(x, y)[0]
 
 
 def cal_pearson_corr(x: Union[np.ndarray, List[float]], y: Union[np.ndarray, List[float]],

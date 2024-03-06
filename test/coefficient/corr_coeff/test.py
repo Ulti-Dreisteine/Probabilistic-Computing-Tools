@@ -1,3 +1,16 @@
+# -*- coding: utf-8 -*-
+"""
+Created on 2024/03/06 15:38:07
+
+@File -> test.py
+
+@Author: luolei
+
+@Email: dreisteine262@163.com
+
+@Describe: END
+"""
+
 import numpy as np
 import unittest
 import sys
@@ -40,4 +53,4 @@ class CorrCoeffTest(unittest.TestCase):
         
 
 if __name__ == "__main__":
-    unittest.main()
+    unittest.main(argv=["first-arg-is-ignored"], exit=False)
