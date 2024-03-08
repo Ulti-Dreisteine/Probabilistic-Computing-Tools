@@ -13,8 +13,10 @@ class MaximalInfoCoeff(object):
 
     def __init__(self, x: np.ndarray, y: np.ndarray, mic_params: dict = None):
         self.x, self.y = x.flatten(), y.flatten()
+        
         if mic_params is None:
             mic_params = {"alpha": ALPHA, "c": C}
+            
         self.mic_params = mic_params
 
     def cal_assoc(self):

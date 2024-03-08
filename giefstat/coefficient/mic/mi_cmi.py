@@ -13,7 +13,8 @@ Created on 2022/09/18 23:21:37
 
 import numpy as np
 
-from ...util import SuperCategorEncoding, discretize_arr
+from ...util import discretize_arr
+from ...util.univar_encoding import SuperCategorEncoding
 from ._mic_rmic import MaximalInfoCoeff, RefinedMaximalInfoCoeff
 
 

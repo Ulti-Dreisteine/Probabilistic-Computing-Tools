@@ -11,11 +11,13 @@ from .mi_model import MutualInfoModel, CondMutualInfoModel
 from .mi_quant import MutualInfoClassic, MutualInfoDarbellay
 from .corr_coeff.coeff import cal_dist_corr, cal_pearson_corr, cal_spearman_corr
 
+# 所支持的关联和条件关联度量算法
 ASSOC_METHODS = [
     "PearsonCorr", "SpearmanCorr", "DistCorr",
     "MI-GIEF", "MI-model", "MI-cut", "MI-qcut", "MI-Darbellay", "MI-KDE",
     "MIC", "RMIC"
 ]
+
 COND_ASSOC_METHODS = [
     "CMI-GIEF", "CMI-model", "CMI-cut", "CMI-qcut",
     "CMIC", "CRMIC", "DRV"
@@ -128,7 +130,12 @@ def cal_cond_assoc(x: np.ndarray, y: np.ndarray, z: np.ndarray, method: str, xty
     elif method == "CRMIC":
         return CMIC(x, y, z)(method="rmic")
     elif method == "DRV":
-        return drv.information_mutual_conditional(x, y, z)
+        from ..util import discretize_series
+        x_enc = discretize_series(x).astype(int)
+        y_enc = discretize_series(y).astype(int)
+        z_enc = discretize_series(z).astype(int)
+        
+        return drv.information_mutual_conditional(x_enc, y_enc, z_enc)
     else:
         raise ValueError(f"Unsupported method: {method}.")
     
