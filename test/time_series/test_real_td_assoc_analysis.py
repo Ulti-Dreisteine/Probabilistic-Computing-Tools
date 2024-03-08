@@ -26,5 +26,5 @@ if __name__ == "__main__":
         x = X[:, i - 1]
         tau_x = taus[f"X{i}"]
         td_lags = np.arange(-20 * tau_x, 20 * tau_x + tau_x, tau_x)
-        _ = measure_td_assoc(x, y, td_lags, show=True, alpha=0.01, rounds=10)
+        _ = measure_td_assoc(x, y, td_lags, show=True, alpha=0.01, rounds=100)
         plt.show()
