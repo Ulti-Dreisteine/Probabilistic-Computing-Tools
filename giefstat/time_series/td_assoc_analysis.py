@@ -17,7 +17,7 @@ import numpy as np
 import logging
 
 from ..util import build_td_series
-from ..independence_test.surrog_indep_test import exec_surrog_indep_test
+from ..indep_test.surrog_indep_test import exec_surrog_indep_test
 
 
 def _deter_size_bt(N: int, taus: Union[np.ndarray, List[int]], max_size_bt: int) -> int:

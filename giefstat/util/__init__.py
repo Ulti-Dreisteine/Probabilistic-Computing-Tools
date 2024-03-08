@@ -11,8 +11,6 @@ from scipy.special import gamma
 import pandas as pd
 import numpy as np
 
-from .univar_encoding import SuperCategorEncoding
-
 
 ####################################################################################################
 # 数据处理 
@@ -92,7 +90,7 @@ def discretize_series(x: np.ndarray, n: int = None, method: str = "qcut") -> np.
     if method == "qcut":
         return pd.qcut(x.flatten(), q, labels=False, duplicates="drop").flatten()  # 等频分箱
     elif method == "cut":
-        return pd.cut(x.reshape(len(x), 1), q, labels=False, duplicates="drop").flatten()  # 等宽分箱
+        return pd.cut(x.flatten(), q, labels=False, duplicates="drop").flatten()  # 等宽分箱
     else:
         raise ValueError(f"Invalid method {method}")
 

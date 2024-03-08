@@ -30,7 +30,7 @@ SUPER_METHODS = ["target", "m_estimator", "james_stein", "glmm", "woe", "leave_o
 class UnsuperCategorEncoding(object):
     """无监督一维类别值编码"""
     
-    def __init__(self, x: np.ndarray or list):
+    def __init__(self, x: Union[np.ndarray, list]):
         self.x = pd.Series(np.array(x).astype(np.int).flatten(), name = "x")  # type: pd.Series
         self.N = len(x)
         
@@ -87,7 +87,7 @@ class SuperCategorEncoding(object):
     x_enc = super_enc.mhg_encoding()
     """
     
-    def __init__(self, x: Union[np.ndarray, List[float]], y: Union[np.ndarray, List[float]]):
+    def __init__(self, x: Union[np.ndarray, list], y: Union[np.ndarray, list]):
         """
         初始化
         
@@ -96,7 +96,7 @@ class SuperCategorEncoding(object):
         x: x序列, x一定为Nominal类别型变量
         y: y序列, y一定为数值型变量
         """
-        self.x = pd.Series(np.array(x).astype(int).flatten(), name = "x")  # type: pd.Series
+        self.x = pd.Series(np.array(x).astype(np.int).flatten(), name = "x")  # type: pd.Series
         self.y = pd.Series(np.array(y).astype(np.float32).flatten(), name = "y")  # type: pd.Series
 
     def _encode_transform(self, enc) -> np.ndarray:

@@ -57,21 +57,21 @@ def build_td_series(x: np.ndarray, y: np.ndarray, td_lag: int, Z: Optional[np.nd
     return (x_td, y_td) if Z is None else (x_td, y_td, Z_td) # type: ignore
 
 
-def _build_td_series(x: np.ndarray, y: np.ndarray, td_lag: int) -> Tuple[np.ndarray, np.ndarray]:
-    x_td_, y_td_ = x.flatten(), y.flatten()
-    lag_remain = np.abs(td_lag) % len(x_td_)    # 求余数
+# def _build_td_series(x: np.ndarray, y: np.ndarray, td_lag: int) -> Tuple[np.ndarray, np.ndarray]:
+#     x_td_, y_td_ = x.flatten(), y.flatten()
+#     lag_remain = np.abs(td_lag) % len(x_td_)    # 求余数
 
-    if td_lag == 0:                             # 没有时滞, 那么x_td和y_td_1同时发生
-        x_td = x_td_[1:].copy()
-        y_td = y_td_[1:].copy()
-    elif td_lag > 0:                            # 正时滞, x_td比y_td_1早lag_remain发生
-        x_td = x_td_[:-lag_remain].copy()
-        y_td = y_td_[lag_remain:].copy()
-    else:                                       # 负时滞, x_td比y_td_1晚lag_remain发生
-        x_td = x_td_[lag_remain + 1:].copy()
-        y_td = y_td_[1: -lag_remain].copy()
+#     if td_lag == 0:                             # 没有时滞, 那么x_td和y_td_1同时发生
+#         x_td = x_td_[1:].copy()
+#         y_td = y_td_[1:].copy()
+#     elif td_lag > 0:                            # 正时滞, x_td比y_td_1早lag_remain发生
+#         x_td = x_td_[:-lag_remain].copy()
+#         y_td = y_td_[lag_remain:].copy()
+#     else:                                       # 负时滞, x_td比y_td_1晚lag_remain发生
+#         x_td = x_td_[lag_remain + 1:].copy()
+#         y_td = y_td_[1: -lag_remain].copy()
         
-    return x_td, y_td
+#     return x_td, y_td
 
 
 # ---- 时延传递熵峰值解析 ----------------------------------------------------------------------------
