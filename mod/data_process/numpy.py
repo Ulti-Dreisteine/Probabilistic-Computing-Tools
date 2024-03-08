@@ -1,20 +1,14 @@
-from sklearn.preprocessing import MinMaxScaler
-from collections import defaultdict
+from typing import Optional
 from math import factorial
-from typing import List, Optional
 import pandas as pd
-import random as rd
 import numpy as np
-import math
-
-import copy
 
 EPS = 1e-6
 
 
 # ---- 数据集划分 -----------------------------------------------------------------------------------
 
-def train_test_split(X, y, seed: int = None, test_ratio=0.3):
+def train_test_split(X, y, seed: int = None, test_ratio: float = 0.3):
     X, y = X.copy(), y.copy()
     assert X.shape[0] == y.shape[0]
     assert 0 <= test_ratio < 1
@@ -76,6 +70,7 @@ def compress_z_data(z_arr: np.ndarray) -> np.ndarray:
 
     return z_compress
 
+
 # ---- 数据离散化 -----------------------------------------------------------------------------------
 
 def discretize_series(x: np.ndarray, n: int = 100, method="qcut") -> Optional[np.ndarray]:
@@ -117,6 +112,7 @@ def cal_r2(y, y_pred) -> float:
     r2 = SSreg / SStot
     return r2
 
+
 # ---- 滤波 ----------------------------------------------------------------------------------------
 
 def savitzky_golay(y, window_size, order, deriv = 0, rate = 1) -> np.ndarray:
@@ -125,7 +121,7 @@ def savitzky_golay(y, window_size, order, deriv = 0, rate = 1) -> np.ndarray:
     
     Reference:
     ----------
-    https://en.wikipedia.org/wiki/Savitzky%E2%80%93Golay_filter
+    链接地址：https://en.wikipedia.org/wiki/Savitzky%E2%80%93Golay_filter
     """
     
     try:

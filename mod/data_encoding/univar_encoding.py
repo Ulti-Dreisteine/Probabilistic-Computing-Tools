@@ -16,7 +16,7 @@ import warnings
 warnings.filterwarnings("ignore")
 
 import category_encoders as ce
-from typing import Optional
+from typing import Optional, Union
 import pandas as pd
 import numpy as np
 import random
@@ -30,7 +30,7 @@ SUPER_METHODS = ["target", "m_estimator", "james_stein", "glmm", "woe", "leave_o
 class UnsuperCategorEncoding(object):
     """无监督一维类别值编码"""
     
-    def __init__(self, x: np.ndarray or list):
+    def __init__(self, x: Union[np.ndarray, list]):
         self.x = pd.Series(np.array(x).astype(np.int).flatten(), name = "x")  # type: pd.Series
         self.N = len(x)
         
@@ -87,7 +87,7 @@ class SuperCategorEncoding(object):
     x_enc = super_enc.mhg_encoding()
     """
     
-    def __init__(self, x: np.ndarray or list, y: np.ndarray or list):
+    def __init__(self, x: Union[np.ndarray, list], y: Union[np.ndarray, list]):
         """
         初始化
         

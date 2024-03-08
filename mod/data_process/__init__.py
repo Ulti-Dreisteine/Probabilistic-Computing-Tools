@@ -20,12 +20,12 @@ def search_nearest_neighbors_in_list(lst, x):
     """
     寻找x在有序lst中的两侧(或单侧)邻点值.
     
-    params:
+    Params:
     -------
     x: 用于查询的值
     lst: 有序列表
     
-    return:
+    Return:
     -------
     neighbors, tuple(left_neighbor, right_neighbor)
     """
