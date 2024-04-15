@@ -59,89 +59,63 @@ if __name__ == "__main__":
     plt.figure(figsize=(3, 3))
     for i in range(D):
         plt.subplot(D, 1, i + 1)
-        plt.plot(arr[:1000, i], "k")
+        plt.plot(arr[:500, i], "k", linewidth=0.5)
         ax = plt.gca()
-        ax.spines['top'].set_color('none')
-        ax.spines['bottom'].set_color('none')
-        ax.spines['left'].set_color('none')
-        ax.spines['right'].set_color('none')
+        ax.spines["top"].set_color("none")
+        ax.spines["bottom"].set_color("none")
+        ax.spines["left"].set_color("none")
+        ax.spines["right"].set_color("none")
         plt.xticks([], [])
         plt.yticks([], [])
     plt.tight_layout()
 
-    # ---- 因果检测 ---------------------------------------------------------------------------------
+    # ---- 检测分析 ---------------------------------------------------------------------------------
 
-    idx_x, idx_y = 0, 3
+    idx_x, idx_y = 3, 1
     x, y = arr[:, idx_x], arr[:, idx_y]
-    tau_x, tau_y = 1, 1
 
     m = 3
-    sub_sample_size, rounds = 1000, 5  # 参数提醒
+    sub_sample_size, rounds = 500, 3  # 参数提醒
 
-    len_lags = 10
-    tau_max = int(max(tau_x, tau_y) * 20) + 20
-    taus = np.arange(1, tau_max + 1, 1)  # 时间尺度
+    # 时间尺度
+    tau_max = 20
+    taus = np.arange(1, tau_max + 1, 1)
 
-    te_mtx = np.zeros((len_lags * 2 + 1, len(taus)))
+    # 时延
+    lags = np.arange(-10, (10 + 1) * 1, 1)
 
-    for i, tau in enumerate(taus):
-        print("\r" + f"processing tau {tau}", end="")
+    te_mtx = np.zeros((len(taus), len(taus)))
+    lag_mtx = np.zeros((len(taus), len(taus)))
+    for i, tau_x in enumerate(taus):
+        for j, tau_y in enumerate(taus):
+            print("\r" + f"processing tau_x {tau_x}, tau_y {tau_y}", end="")
 
-        x_sym = symbolize(x, tau, m, tau_max=tau_max)
-        y_sym = symbolize(y, tau, m, tau_max=tau_max)  # NOTE: 自适应符号化
+            x_sym = symbolize(x, tau_x, m, tau_max=20)
+            y_sym = symbolize(y, tau_y, m, tau_max=20)
 
-        self = TransferEntropy(x_sym, y_sym, tau, tau)
+            self = TransferEntropy(x_sym, y_sym, tau_x, tau_y)
 
-        # <<<<<<<<
-        # lags = np.arange(-len_lags * tau, (len_lags + 1) * tau, tau)
-        # >>>>>>>>
-        lags = np.arange(-len_lags * 1, (len_lags + 1) * 1, 1)
+            _td_te = []
+            for lag in lags:
+                te_mean, te_std, te_lst = self.cal_td_te(
+                    lag * tau_x, sub_sample_size=sub_sample_size, rounds=rounds)
+                _td_te.append(te_mean)
 
-        for j, lag in enumerate(lags):
-            kwargs = {"sub_sample_size": sub_sample_size, "rounds": rounds}
-            te_mean, te_std, _ = self.cal_td_te(lag, **kwargs)
-            te_mtx[j, i] = te_mean
+            te_mtx[i, j] = np.max(_td_te)
+            lag_mtx[i, j] = lags[np.argmax(_td_te)] * tau_x
 
-    plt.figure(figsize=(8, 6))
+    plt.figure()
     sns.heatmap(te_mtx, cmap="rainbow")
-    plt.xlabel(r"time scale $\tau$")
-    plt.xticks([0 + 0.5, 9 + 0.5, 19 + 0.5], [1, 10, 20], rotation=0)
-    plt.ylabel(r"time delay $X \rightarrow Y$")
-    plt.yticks([0 + 0.5, 10 + 0.5, 20 + 0.5], [r"-10$\times\tau$", 0, r"10$\times\tau$"], rotation=0)
-    plt.title(r"Transfer Entropy $X \rightarrow Y$ at different time scales and delays", fontsize=14)
-    plt.hlines(10 + 0.5, 0, 160, colors="black", linestyles="dashed")
-    plt.tight_layout()
-
-    # plt.savefig("te_mtx.png", dpi=450)
-
-    sns.set_style("whitegrid")
-    plt.figure(figsize=(6, 6))
-    plt.subplot(2, 1, 1)
-    plt.plot(x[:100])
-    plt.ylabel(r"$X$", font="Times New Roman")
-    plt.grid(linewidth=0.8)
-    plt.xticks(fontname="Times New Roman")
-    plt.yticks(fontname="Times New Roman")
-
-    plt.subplot(2, 1, 2)
-    plt.plot(y[:100])
-    plt.ylabel(r"$Y$", font="Times New Roman")
-    plt.grid(linewidth=0.8)
-    plt.xlabel("time", font="Times New Roman")
-    plt.xticks(fontname="Times New Roman")
-    plt.yticks(fontname="Times New Roman")
-
-    plt.tight_layout()
-    # plt.savefig("time_series.png", dpi=450)
-
+    sns.heatmap(lag_mtx, cmap="RdBu_r")
+    
     # ---- 特征时间参数 ------------------------------------------------------------------------------
-
+    
     from core.acf_test import SelfAssoc, show_td_analysis_results
-
+    
     td_lags = np.arange(0, 10 + 1, 1)
-    self = SelfAssoc(y, sub_sample_size, rounds)
+    self = SelfAssoc(x, sub_sample_size, rounds)
     td_assocs, td_assocs_srg = self.cal_td_assoc_dists(td_lags)
     avg_td_assocs = np.array([np.nanmean(p) for p in td_assocs])
-
+    
     plt.figure()
     plt.plot(avg_td_assocs)
