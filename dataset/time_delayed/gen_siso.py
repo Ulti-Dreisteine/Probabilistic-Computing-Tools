@@ -67,6 +67,7 @@ np.random.seed(1)
 x_0 = np.random.normal(0.0, 9.0, size = samples_n)
 
 SISO_data = pd.DataFrame(range(N), columns = ["No."])
+
 for i in range(4):
     x, y, label = None, None, None
     if i == 0:
@@ -81,8 +82,10 @@ for i in range(4):
     elif i == 3:
         label = "nonlinear_dynamic"
         x, y = gen_nonlinear_dynamic_outputs(x_0, p = 2)
+        
     d = pd.DataFrame(np.vstack((x, y)).T, columns=[f"x_{label}", f"y_{label}"])
     SISO_data = pd.concat([SISO_data, d.head(N)], axis = 1)
+    
 SISO_data.to_csv("siso.csv", index = False)
 
 
