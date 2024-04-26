@@ -1,4 +1,3 @@
-from pyitlib import discrete_random_variable as drv
 import pandas as pd
 from typing import Optional
 import numpy as np
@@ -10,6 +9,7 @@ BASE_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), "../" * 2))
 sys.path.insert(0, BASE_DIR)
 
 from setting import plt, PROJ_CMAP
+from giefstat import drv
 
 # ---- 关联系数SU -----------------------------------------------------------------------------------
 
