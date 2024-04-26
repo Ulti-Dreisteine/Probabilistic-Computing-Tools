@@ -17,6 +17,7 @@ import bisect
 
 
 def search_nearest_neighbors_in_list(lst, x):
+    # sourcery skip: lift-return-into-if, remove-unnecessary-else
     """
     寻找x在有序lst中的两侧(或单侧)邻点值.
     
