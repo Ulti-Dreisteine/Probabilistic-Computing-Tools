@@ -1,8 +1,8 @@
-from pyitlib import discrete_random_variable as drv
 import pandas as pd
 import numpy as np
 
 from ...util import stdize_values, discretize_series
+from ...pyitlib import discrete_random_variable as drv
 
 
 class MutualInfoClassic(object):

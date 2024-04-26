@@ -1,8 +1,8 @@
-from pyitlib import discrete_random_variable as drv
 from typing import Union
 import numpy as np
 
 from ..setting import DTYPES
+from ..pyitlib import discrete_random_variable as drv
 
 from .mi_gief import MutualInfoGIEF, CondMutualInfoGIEF, MargEntropy, CondEntropy
 from .mi_kde import MutualInfoKDE
