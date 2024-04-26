@@ -46,10 +46,10 @@ class RefinedMaximalInfoCoeff(object):
         
         if not rebase:
             return mic
-        else:
-            base_mic = self._cal_base_mic(len(self.x))
-            return (mic - base_mic) / (1.0 - base_mic)
-            # return (mic - base_mic) / (1.0 - base_mic) if mic > base_mic else 0.0
+        
+        base_mic = self._cal_base_mic(len(self.x))
+        return (mic - base_mic) / (1.0 - base_mic)
+        # return (mic - base_mic) / (1.0 - base_mic) if mic > base_mic else 0.0
     
     @staticmethod
     def _cal_base_mic(n):
