@@ -16,6 +16,8 @@ DS_METHODS = [
 
 
 # 系数计算
+# NOTE：注意iid条件
+
 
 def _deter_bootstrap_size(x: np.ndarray, size_bt: int, max_size_bt: int) -> int:
     """
