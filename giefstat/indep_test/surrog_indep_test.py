@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Tuple, Optional
 import arviz as az
 import numpy as np
 import logging
@@ -17,7 +17,7 @@ DS_METHODS = [
 
 # 系数计算
 
-def _deter_bootstrap_size(x: np.ndarray, size_bt: int, max_size_bt: int) -> int:
+def _deter_bootstrap_size(x: np.ndarray, size_bt: Optional[int], max_size_bt: int) -> int:
     """
     确定随机抽取样本量
     
