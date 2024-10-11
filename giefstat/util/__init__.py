@@ -150,7 +150,7 @@ def get_unit_ball_volume(d: int, metric: str = "euclidean") -> Optional[float]:
     if metric == "euclidean":
         return (np.pi ** (d / 2)) / gamma(1 + d / 2)  
     elif metric == "chebyshev":
-        return 1
+        return 2 ** d
     else:
         raise ValueError(f"unsupported metric {metric}")
     
