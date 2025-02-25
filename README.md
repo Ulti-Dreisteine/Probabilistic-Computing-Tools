@@ -28,8 +28,8 @@ conda create -n giefstat python=3.9
 conda activate giefstat
 
 # 安装依赖
-conda install jupyter
 pip install matplotlib==3.7.3 pandas==1.5.3 numpy==1.24.4 pingouin==0.5.4 scikit-learn==0.24.0 scipy==1.10.1 arviz==0.15.1 category_encoders==2.6.3
+pip install jupyter
 
 # 安装本地wheel文件
 pip install F:\github\Probabilistic-Computing-Tools\pkg\minepy-1.2.6-cp39-cp39-win_amd64.whl
@@ -37,7 +37,7 @@ pip install F:\github\Probabilistic-Computing-Tools\pkg\minepy-1.2.6-cp39-cp39-w
 
 #### Project Structure
 
-```y
+```
     |-- giefstat
     |   |
     |   |-- __init__.py
